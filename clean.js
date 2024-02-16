@@ -13,7 +13,7 @@ const clean408 = async () => {
       const content = await fsPromises.readFile(filepath, {
         encoding: "utf-8",
       });
-      if (content === "Request Failed. Status Code: 408") {
+      if (content === "Request Failed. Status Code: 408 !!") {
         console.log(filepath);
         await fsPromises.unlink(filepath);
       }

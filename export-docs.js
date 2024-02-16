@@ -24,24 +24,26 @@ const getDocs = async () => {
             encoding: "utf-8",
           })
         );
-        parent = metadata.parent.length === 36 ? metadata.parent : "";
+        parent = metadata.parent;
+        if(parent === "trash") break;
         if (metadata.type === "CollectionType") {
           newDir = `${metadata.visibleName}/${newDir}`;
         }
       } while (parent !== "");
 
-      docs[id] = {
-        folder: newDir,
-        metadata: JSON.parse(
-          await fsPromises.readFile(`${folderPath}/${id}.metadata`, {
-            encoding: "utf-8",
-          })
-        ),
-      };
-
-      if(docs[id].metadata.type === "CollectionType") {
-        delete docs[id];
+      const documentMetadata = JSON.parse(
+        await fsPromises.readFile(`${folderPath}/${id}.metadata`, {
+          encoding: "utf-8",
+        })
+      );
+        
+      if(parent !== "trash" && documentMetadata.type !== "CollectionType"){
+        docs[id] = {
+          folder: newDir,
+          metadata: documentMetadata
+        };
       }
+
     }
   }
   return docs;
