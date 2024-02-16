@@ -54,19 +54,19 @@ const downloadDoc = async (id, folder, metadata) => {
     console.log(`Trace already exists. Skipping ${folder}${id}`);
     return;
   } else {
-    console.log("New file", folder, id, metadata.visibleName);
+    console.log(`New file \"${metadata.visibleName}\" ${id}`);
   }
 
   return new Promise((resolve, reject) =>
     http
       .get(url, {}, (res) => {
         if (res.statusCode === 200) {
-          const filename =`${metadata.visibleName}.pdf`
+          const filename =`${metadata.visibleName.replace("/", "_")}.pdf`
           const filepath = folder
             ? `./documents/${folder}${filename}`
             : `./documents/${filename}`;
 
-          console.log(`Adding ${filepath} ${id}`);
+          console.log(`Adding ${filepath}`);
 
           if (fs.existsSync(filepath)) {
             reject("File has already been downloaded.");
@@ -82,15 +82,13 @@ const downloadDoc = async (id, folder, metadata) => {
             resolve(filename);
           });
         } else {
-          const msg = `Request Failed. Status Code: ${res.statusCode}`;
-          console.log("!!!");
+          const msg = `Request Failed. Status Code: ${res.statusCode} !!`;
           fs.writeFileSync(traceFilepath, msg);
           reject(msg);
         }
       })
       .on("error", (e) => {
-        reject(`Got error: ${e.message}`);
-        console.log("!!!");
+        reject(`Got error: ${e.message} !!`);
       })
   ).catch((error) => console.log(error));
 };
