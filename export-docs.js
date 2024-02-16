@@ -63,7 +63,7 @@ const downloadDoc = async (id, folder, metadata) => {
     http
       .get(url, {}, (res) => {
         if (res.statusCode === 200) {
-          const filename =`${metadata.visibleName.replace("/", "_")}.pdf`
+          const filename =`${metadata.visibleName.replaceAll("/", "_")}.pdf`
           const filepath = folder
             ? `./documents/${folder}${filename}`
             : `./documents/${filename}`;
