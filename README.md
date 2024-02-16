@@ -9,11 +9,11 @@ Also, it contains .metadata files with useful information (used in the script) a
 
 ## 1. Get all the raw content (without annotations)
 
-First get all the content from your rM. You can connect via ssh once you connect via usb. Go in Settings>Storage and activate the web interface.
+First get all the content from your rM. You can connect via ssh once you connect via usb. Go in Settings>Storage and activate the web interface. Then, copy all file from the rM on your computer:
 
 `scp -rp root@10.11.99.1:/home/root/.local/share/remarkable/xochitl/ ./raw/`
 
-the password can be found in General > Help: About > Copyright and licences
+(the password can be found in General > Help: About > Copyright and licences)
 
 ## 2. Export the docs
 
