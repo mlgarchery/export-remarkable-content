@@ -1,9 +1,10 @@
 import fsPromises from "node:fs/promises";
 import fs from "node:fs";
 import http from "http";
+import {Buffer} from "buffer"
 
 // Specify the path to your folder
-const folderPath = "./raw/files/xochitl";
+const folderPath = "./raw/xochitl";
 
 const getDocs = async () => {
   const files = await fsPromises.readdir(folderPath);
@@ -23,11 +24,9 @@ const getDocs = async () => {
             encoding: "utf-8",
           })
         );
+        parent = metadata.parent.length === 36 ? metadata.parent : "";
         if (metadata.type === "CollectionType") {
           newDir = `${metadata.visibleName}/${newDir}`;
-          parent = metadata.parent.length === 36 ? metadata.parent : "";
-        } else {
-          parent = "";
         }
       } while (parent !== "");
 
@@ -39,24 +38,17 @@ const getDocs = async () => {
           })
         ),
       };
+
+      if(docs[id].metadata.type === "CollectionType") {
+        delete docs[id];
+      }
     }
   }
   return docs;
 };
 
-// From header Content-disposition
-const extractFilename = (header) => {
-  const regex = /filename="([^"]+)"/;
-  const match = header.match(regex);
-
-  if (match && match[1]) {
-    return match[1];
-  } else {
-    return null;
-  }
-};
-
-const downloadDoc = async (id, folder, visibleName) => {
+const downloadDoc = async (id, folder, metadata) => {
+  console.log("FOLDER:", folder)
   const url = `http://10.11.99.1/download/${id}/rmdoc`;
   // const url = `http://10.11.99.1/download/e47247d2-38d8-4c29-bec4-57b5d902ef21/rmdoc`;
   const traceFilepath = `./documents/${folder}${id}.txt`;
@@ -64,30 +56,16 @@ const downloadDoc = async (id, folder, visibleName) => {
     console.log(`Trace already exists. Skipping ${folder}${id}`);
     return;
   } else {
-    console.log("New file", folder, id, visibleName);
-  }
-
-  // Some file break the download, we ship their download
-  if (
-    [
-      "a0215bc5-834c-4f43-9846-3215ea534268",
-      "a9f13630-8020-40c8-bc16-1071e6475afe",
-    ].includes(id)
-  ) {
-    return;
+    console.log("New file", folder, id, metadata.visibleName);
   }
 
   return new Promise((resolve, reject) =>
     http
-      .get(url, (res) => {
+      .get(url, {}, (res) => {
         // Check if the statusCode is 200
         if (res.statusCode === 200) {
-          const filename = extractFilename(res.headers["content-disposition"]);
 
-          if (!filename) {
-            reject("Filename not found in header Content-disposition");
-            return;
-          }
+          const filename =`${metadata.visibleName}.pdf`
           const filepath = folder
             ? `./documents/${folder}${filename}`
             : `./documents/${filename}`;
@@ -104,7 +82,7 @@ const downloadDoc = async (id, folder, visibleName) => {
             fileStream.close();
             console.log(`Complete`);
             console.log("---");
-            fs.writeFileSync(traceFilepath, "");
+            fs.writeFileSync(traceFilepath, JSON.stringify(metadata));
             resolve(filename);
           });
         } else {
@@ -129,7 +107,7 @@ getDocs().then(async (docs) => {
     if (docs[doc].folder) {
       fs.mkdirSync(`./documents/${docs[doc].folder}`, { recursive: true });
     }
-    await downloadDoc(doc, docs[doc].folder, docs[doc].metadata.visibleName);
+    await downloadDoc(doc, docs[doc].folder, docs[doc].metadata);
     i++;
     console.log(`${i}/${nbDocs}`);
   }
