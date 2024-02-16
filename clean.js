@@ -1,5 +1,8 @@
 import fsPromises from "node:fs/promises";
 
+/**
+ * Remove traces for documents for which download has timed out.
+ */
 const clean408 = async () => {
   const files = await fsPromises.readdir("./documents");
   for (const file of files) {

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import http from "http";
 import {Buffer} from "buffer"
 
-// Specify the path to your folder
+// Specify the path to your folder containing the reMarkable content
 const folderPath = "./raw/xochitl";
 
 const getDocs = async () => {
@@ -48,9 +48,7 @@ const getDocs = async () => {
 };
 
 const downloadDoc = async (id, folder, metadata) => {
-  console.log("FOLDER:", folder)
   const url = `http://10.11.99.1/download/${id}/rmdoc`;
-  // const url = `http://10.11.99.1/download/e47247d2-38d8-4c29-bec4-57b5d902ef21/rmdoc`;
   const traceFilepath = `./documents/${folder}${id}.txt`;
   if (fs.existsSync(traceFilepath)) {
     console.log(`Trace already exists. Skipping ${folder}${id}`);
@@ -62,9 +60,7 @@ const downloadDoc = async (id, folder, metadata) => {
   return new Promise((resolve, reject) =>
     http
       .get(url, {}, (res) => {
-        // Check if the statusCode is 200
         if (res.statusCode === 200) {
-
           const filename =`${metadata.visibleName}.pdf`
           const filepath = folder
             ? `./documents/${folder}${filename}`
@@ -86,15 +82,15 @@ const downloadDoc = async (id, folder, metadata) => {
             resolve(filename);
           });
         } else {
-          console.log(folder, id);
           const msg = `Request Failed. Status Code: ${res.statusCode}`;
+          console.log("!!!");
           fs.writeFileSync(traceFilepath, msg);
-          console.log("---");
           reject(msg);
         }
       })
       .on("error", (e) => {
         reject(`Got error: ${e.message}`);
+        console.log("!!!");
       })
   ).catch((error) => console.log(error));
 };
