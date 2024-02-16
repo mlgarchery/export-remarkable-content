@@ -21,5 +21,5 @@ With nodejs 18 (! not working with an above version, because of inconsistent res
 
 `nodejs export-docs.js`
 
-It take time (~30 seconds by document).
+It takes time (~30 seconds by document).
 Wait until every document is exported. Folders hierarchy is kept.
